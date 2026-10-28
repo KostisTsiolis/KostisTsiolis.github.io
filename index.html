@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Profile</title>
+  <script src="config.js?v=2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0; min-height: 100vh; min-height: 100dvh; display: grid; place-items: center;
+      padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+               max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #111827;
+      background: #990000;
+    }
+    /* fixed layer instead of background-attachment: fixed, which iOS ignores */
+    .bg {
+      position: fixed; inset: 0; z-index: -1;
+      background: url("assets/dtu-waves.svg") center / cover no-repeat, #990000;
+    }
+    .card {
+      width: 100%; max-width: 380px; text-align: center; padding: 36px 28px;
+      background: rgba(255,255,255,.97); backdrop-filter: blur(8px);
+      border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,.25);
+    }
+    .photo {
+      width: 140px; height: 140px; border-radius: 50%; object-fit: cover;
+      border: 4px solid #fff; box-shadow: 0 6px 18px rgba(0,0,0,.2);
+    }
+    .initials {
+      width: 140px; height: 140px; border-radius: 50%; margin: 0 auto;
+      display: grid; place-items: center; font-size: 2.6rem; font-weight: 700;
+      background: #990000; color: #fff;
+    }
+    h1 { margin: 18px 0 4px; font-size: clamp(1.3rem, 5vw, 1.5rem); overflow-wrap: anywhere; }
+    .title { margin: 0; color: #4b5563; }
+    .org { margin: 2px 0 0; color: #990000; font-weight: 600; }
+    .links { margin-top: 26px; display: grid; gap: 10px; }
+    .links a {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      min-height: 48px; padding: 12px; border-radius: 10px; text-decoration: none; font-weight: 600;
+      -webkit-tap-highlight-color: transparent; transition: transform .1s;
+    }
+    .links a:active { transform: scale(.98); }
+    #emailText { min-width: 0; overflow-wrap: anywhere; }
+    .save { background: #990000; color: #fff; }
+    .linkedin { background: #0a66c2; color: #fff; }
+    .email { background: #fff; color: #111827; border: 1px solid #d1d5db; }
+    svg { width: 20px; height: 20px; flex-shrink: 0; fill: currentColor; }
+    @media (max-width: 360px) {
+      .card { padding: 28px 18px; border-radius: 16px; }
+      .photo, .initials { width: 112px; height: 112px; }
+      .initials { font-size: 2.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg"></div>
+  <div class="card">
+    <div id="photo"></div>
+    <h1 id="name"></h1>
+    <p class="title" id="title"></p>
+    <p class="org" id="org"></p>
+    <div class="links">
+      <a class="save" id="save" href="contact.vcf" download>
+        <svg viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+        Save contact
+      </a>
+      <a class="linkedin" id="linkedin" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>
+        LinkedIn
+      </a>
+      <a class="email" id="email">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        <span id="emailText"></span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const p = window.PROFILE;
+    document.title = p.name;
+    document.getElementById("name").textContent = p.name;
+    document.getElementById("title").textContent = p.title;
+    document.getElementById("org").textContent = p.org;
+    document.getElementById("linkedin").href = p.linkedin;
+    document.getElementById("email").href = "mailto:" + p.email;
+    document.getElementById("emailText").textContent = p.email;
+    document.getElementById("save").download = p.name + ".vcf";
+
+    // Photo, falling back to initials if the file is missing
+    const photoBox = document.getElementById("photo");
+    const showInitials = () => {
+      const initials = p.name.split(" ").map(w => w[0]).join("").slice(0, 2);
+      photoBox.innerHTML = `<div class="initials">${initials}</div>`;
+    };
+    const img = new Image();
+    img.className = "photo";
+    img.alt = p.name;
+    img.onload = () => photoBox.replaceChildren(img);
+    img.onerror = showInitials;
+    img.src = p.photo;
+  </script>
+</body>
+</html>
