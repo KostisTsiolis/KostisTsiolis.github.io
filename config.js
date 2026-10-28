@@ -9,5 +9,5 @@ window.PROFILE = {
   background: "assets/aiod-background.png", // AIoD banner for the printed QR card
   // Leave empty to use the address the site is opened from.
   // After deploying, you can set it to e.g. "https://yourdomain.com/profile.html".
-  profileUrl: ""
+  profileUrl: "https://kostistsiolis.github.io/"
 };
