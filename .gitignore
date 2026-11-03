@@ -1,1 +1,7 @@
 .DS_Store
+# QR card generators: local only (run python3 serve.py, open localhost:8000/qr.html)
+qr.html
+qr-biped.html
+assets/aiod-background.png
+assets/biped-background.png
+assets/biped-logo.png
